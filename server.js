@@ -6,6 +6,9 @@ import winston from 'winston';
 import crypto from 'crypto';
 import fs from 'fs';
 
+const devicesContent = fs.readFileSync('./src/emulateDevices.json', 'utf8');
+const devices = JSON.parse(devicesContent);
+
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
@@ -22,12 +25,23 @@ if (!fs.existsSync(metaDir)) {
   fs.mkdirSync(metaDir);
 }
 
+const buildeSnapshotOption = ctx => {
+  return {
+    full: ctx.query.full === 'true',
+    toBase64: ctx.query.toBase64 === 'true',
+    width: ctx.query.width ? parseInt(ctx.query.width) : undefined,
+    height: ctx.query.height ? parseInt(ctx.query.height) : undefined,
+    userAgent: devices.find(device => device.title === ctx.query.device)?.['user-agent'],
+  }
+}
+
 
 router.get('/api/snapshot', async ctx => {
   logger.info(`Snapshot taken for ${ctx.query.url}`);
   ctx.set('Content-Type', 'image/png');
 
-  const urlDigest = crypto.createHash('md5').update(ctx.query.url).digest('hex');
+  const option = buildeSnapshotOption(ctx);
+  const urlDigest = crypto.createHash('md5').update(ctx.query.url + JSON.stringify(option)).digest('hex');
   const cahcedImage = cacheDir + '/' + urlDigest + '.png';
   // Check cache first
   if (fs.existsSync(cahcedImage)) {
@@ -37,7 +51,7 @@ router.get('/api/snapshot', async ctx => {
   }
 
   // Take snapshot for the url
-  const image = await snapshot(decodeURIComponent(ctx.query.url), false);
+  const image = await snapshot(decodeURIComponent(ctx.query.url), option);
   logger.info(`Snapshot complete for ${ctx.query.url}`);
 
   // Cache the snapshot
@@ -45,7 +59,7 @@ router.get('/api/snapshot', async ctx => {
   logger.info(`Snapshot cached for ${ctx.query.url}`);
 
   // Cache the snapshot meta
-  fs.writeFileSync(metaDir + '/' + urlDigest, JSON.stringify({url: ctx.query.url, createdAt: new Date()}));
+  fs.writeFileSync(metaDir + '/' + urlDigest, JSON.stringify({url: ctx.query.url, createdAt: new Date(), option}));
   logger.info(`Snapshot meta cached for ${ctx.query.url}`);
 
   ctx.body = Buffer.alloc(image.length, image);

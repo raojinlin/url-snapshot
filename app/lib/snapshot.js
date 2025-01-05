@@ -9,23 +9,28 @@ import puppeteer from 'puppeteer';
       .replace(/\//g, '-');
   };
 
-const snapshot = async (url, toBase64=false) => {
+const snapshot = async (url, option={full: true, toBase64: false, width: 1470, height: 956, userAgent: ''}) => {
   const browser = await puppeteer.launch({
     executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
   });
   const page = await browser.newPage();
 
+  if (option.userAgent) {
+    await page.setUserAgent(option.userAgent)
+  }
+
   await page.goto(url, {
     waitUntil: 'networkidle2'
+  }, {
   });
 
   // Set screen size.
-  await page.setViewport({width: 1470, height: 956});
+  await page.setViewport({width: option.width || 1470, height: option.height || 956});
 
   const image = await page.screenshot({
-    path: normalizeURL(url) + '.png',
-    fullPage: true,
-    encoding: toBase64 ? 'base64' : 'binary',
+    // path: normalizeURL(url) + '.png',
+    fullPage: option.full,
+    encoding: option.toBase64 ? 'base64' : 'binary',
   });
 
 
