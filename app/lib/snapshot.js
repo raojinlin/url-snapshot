@@ -1,17 +1,10 @@
 import puppeteer from 'puppeteer';
-
-// Normalize url to filename.
-  const normalizeURL = (url) => {
-    const parsedUrl = new URL(url);
-    return (parsedUrl.hostname + parsedUrl.pathname)
-      .replace(/(?:http|https):\/\//, '')
-      .replace(/\./g, '_')
-      .replace(/\//g, '-');
-  };
+import os from 'os';
 
 const snapshot = async (url, option={full: true, toBase64: false, width: 1470, height: 956, userAgent: ''}) => {
   const browser = await puppeteer.launch({
-    executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    executablePath: os.platform() === 'darwin' ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" : undefined,
+    args: ['--no-sandbox'],
   });
   const page = await browser.newPage();
 
@@ -21,7 +14,6 @@ const snapshot = async (url, option={full: true, toBase64: false, width: 1470, h
 
   await page.goto(url, {
     waitUntil: 'networkidle2'
-  }, {
   });
 
   // Set screen size.
@@ -34,6 +26,7 @@ const snapshot = async (url, option={full: true, toBase64: false, width: 1470, h
   });
 
 
+  await page.close();
   await browser.close();
   return image;
 }

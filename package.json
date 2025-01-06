@@ -7,7 +7,7 @@
     "email": "raojinlin302@gmail.com",
     "url": "https://github.com/raojinlin"
   },
-  "homepage": "https://github.com/raojinlin/url-snapshot",
+  "homepage": "https://url-snapshot.bytemap.cc",
   "type": "module",
   "proxy": "http://127.0.0.1:3001",
   "dependencies": {

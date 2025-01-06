@@ -40,6 +40,12 @@ const buildeSnapshotOption = ctx => {
 
 
 router.get('/api/snapshot', async ctx => {
+  if (!ctx.query.url) {
+    ctx.status = 400;
+    ctx.body = 'url is required';
+    return;
+  }
+
   logger.info(`Snapshot taken for ${ctx.query.url}`);
   ctx.set('Content-Type', 'image/png');
 
