@@ -38,6 +38,20 @@ http://localhost:3000
 
 3. 输入 URL 并生成快照。
 
+## API 文档
+### 获取截屏
+
+- 方法: GET
+- URL: /api/snapshot
+- 参数:
+  - url: 要截屏的 URL
+  - width: 截图宽度，默认为 1280
+  - height: 截图高度，默认为 720
+  - full: 是否截取整个页面，默认为 false
+  - device: 设备类型，默认为 '''
+
+- 响应：PNG 图片
+
 ## 贡献指南
 1. Fork 这个仓库。
 2. 创建一个分支。

@@ -5,6 +5,9 @@ import snapshot from './app/lib/snapshot.js';
 import winston from 'winston';
 import crypto from 'crypto';
 import fs from 'fs';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
+
+const rateLimiter = new RateLimiterMemory({points: 3, duration: 1});
 
 const devicesContent = fs.readFileSync('./src/emulateDevices.json', 'utf8');
 const devices = JSON.parse(devicesContent);
@@ -66,7 +69,17 @@ router.get('/api/snapshot', async ctx => {
 })
 
 app.use(router.routes());
-app.use(serve('public'));
+app.use(serve('build'));
+
+app.use(async (ctx, next) => {
+  try {
+    await rateLimiter.consume(ctx.ip);
+    await next();
+  } catch (e) {
+    ctx.status = 429;
+    ctx.body = 'Too many requests';
+  }
+})
 
 logger.info('Server listend: 0.0.0.0:30001')
 app.listen(3001);
