@@ -1,7 +1,13 @@
 {
-  "name": "my-app",
+  "name": "url-snapshot",
   "version": "0.1.0",
   "private": true,
+  "author": {
+    "name": "raojinlin",
+    "email": "raojinlin302@gmail.com",
+    "url": "https://github.com/raojinlin"
+  },
+  "homepage": "https://github.com/raojinlin/url-snapshot",
   "type": "module",
   "proxy": "http://127.0.0.1:3001",
   "dependencies": {
